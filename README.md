@@ -34,7 +34,8 @@ Requires `g++` with C++17 support. Output binary is `./game_engine`.
 `Engine` runs a fixed-rate loop (~60 FPS) and calls three virtual methods you override in your game class:
 
 ```cpp
-class MyGame : public Engine {
+class MyGame : public Engine
+{
     void onInit()           override { /* spawn entities */ }
     void onUpdate(float dt) override { /* move things */    }
     void onRender()         override { /* draw things */    }
@@ -46,12 +47,13 @@ class MyGame : public Engine {
 Entities are just IDs. Components are plain structs that inherit from `Component`.
 
 ```cpp
-// Define a component
-struct Health : Component {
+// define a component
+struct Health : Component
+{
     int hp = 100;
 };
 
-// Use it
+// use it
 auto& ecs   = ECS::get();
 EntityID e  = ecs.createEntity();
 ecs.addComponent<Health>(e);
@@ -72,7 +74,8 @@ Vec2 c = Vec2::up() + Vec2::right();
 ### Input
 
 ```cpp
-if (Input::get().isKeyDown(Key::W)) {
+if (Input::get().isKeyDown(Key::W))
+{
     // move up
 }
 ```
