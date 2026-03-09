@@ -31,7 +31,7 @@ Requires `g++` with C++17 support. Output binary is `./game_engine`.
 
 ### Engine loop
 
-`Engine` runs a fixed-rate loop (~60 FPS) and calls three virtual methods you override in your game class:
+`Engine` runs a fixed-rate loop (~60 FPS) and calls three virtual methods I override in my game class:
 
 ```cpp
 class MyGame : public Engine
