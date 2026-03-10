@@ -1,25 +1,42 @@
 # C++ Game Engine
 
-A lightweight, from-scratch 2D game engine written in C++17. No external dependencies
+A lightweight, from-scratch 2D game engine written in C++17.  
+**Dependencies: SDL2** (everything else is stdlib).
 
 ## Files
 
 | File | Description |
 |------|-------------|
 | `main.cpp` | Entry point |
-| `Engine.h/cpp` | Core game loop with delta time and virtual hooks |
-| `Vec2.h` | 2D vector math (operators, normalize, dot product) |
-| `Input.h/cpp` | Singleton input system with key state tracking |
+| `Engine.h/cpp` | SDL2 window + renderer, game loop with delta time, virtual hooks |
+| `Vec2.h` | 2D vector math (operators, normalize, dot, etc.) |
+| `Input.h/cpp` | Singleton input system — translates SDL2 keyboard events to `Key` states |
 | `ECS.h/cpp` | Entity Component System — create entities, attach/query typed components |
-| `Game.h/cpp` | Your game layer — extend Engine and define your own logic here |
+| `TileMap.h` | `TileMap` component + `TileMapSystem::render()` |
+| `Game.h/cpp` | Demo game — player moves through a tiled room |
+
+## Dependencies
+
+Install SDL2:
+```bash
+# Ubuntu / Debian
+sudo apt install libsdl2-dev
+
+# macOS (Homebrew)
+brew install sdl2
+
+# Windows (MSYS2)
+pacman -S mingw-w64-x86_64-SDL2
+```
 
 ## Building
 
 ```bash
+chmod +x build.sh
 ./build.sh
 ```
 
-Requires `g++` with C++17 support. Output binary is `./game_engine`.
+Requires `g++` with C++17 support and SDL2. Output binary is `./game_engine`.
 
 ## Running
 
@@ -27,65 +44,75 @@ Requires `g++` with C++17 support. Output binary is `./game_engine`.
 ./game_engine
 ```
 
+**Controls:** WASD or arrow keys to move · ESC to quit
+
 ## Architecture
 
 ### Engine loop
 
-`Engine` runs a fixed-rate loop (~60 FPS) and calls three virtual methods I override in my game class:
+`Engine` owns the SDL2 window and renderer. Override virtual hooks in your game subclass:
 
 ```cpp
-class MyGame : public Engine
-{
-    void onInit()           override { /* spawn entities */ }
-    void onUpdate(float dt) override { /* move things */    }
-    void onRender()         override { /* draw things */    }
+class MyGame : public Engine {
+    void onInit()                    override { /* spawn entities, load map */ }
+    void onEvent(const SDL_Event& e) override { /* handle raw SDL events    */ }
+    void onUpdate(float dt)          override { /* move things              */ }
+    void onRender()                  override { /* draw via getRenderer()   */ }
 };
 ```
 
 ### ECS
 
-Entities are just IDs. Components are plain structs that inherit from `Component`.
+Entities are plain `uint32_t` IDs. Components are structs that inherit `Component`.
 
 ```cpp
-// define a component
-struct Health : Component
-{
-    int hp = 100;
-};
+struct Health : Component { int hp = 100; };
 
-// use it
-auto& ecs   = ECS::get();
-EntityID e  = ecs.createEntity();
+auto& ecs  = ECS::get();
+EntityID e = ecs.createEntity();
 ecs.addComponent<Health>(e);
-
-Health* h = ecs.getComponent<Health>(e);
-h->hp -= 10;
+ecs.getComponent<Health>(e)->hp -= 10;
 ```
+
+### TileMap
+
+```cpp
+// Create a 20×15 grid with 32×32 px tiles
+auto& map = ecs.addComponent<TileMap>(mapEntity, 20, 15, 32, 32);
+map.set(col, row, TileType::Wall);
+
+// Render it (call from onRender)
+TileMapSystem::render(getRenderer(), map);
+
+// Solid-tile query for collision
+if (map.isSolid(playerPos)) { /* blocked */ }
+```
+
+**TileTypes:** `Empty`, `Ground`, `Wall`, `Water`  
+Add your own by extending the `TileType` enum and the `tileColor()` table in `TileMap.h`.
+
+### Input
+
+```cpp
+if (Input::get().isKeyDown(Key::W)) { /* move up */ }
+```
+
+SDL2 keyboard events are processed automatically by `Engine` each frame.
 
 ### Vec2
 
 ```cpp
 Vec2 a{3, 4};
-Vec2 b = a.normalized();   // {0.6, 0.8}
+Vec2 b = a.normalized();
 float d = a.dot(b);
 Vec2 c = Vec2::up() + Vec2::right();
 ```
 
-### Input
-
-```cpp
-if (Input::get().isKeyDown(Key::W))
-{
-    // move up
-}
-```
-
-Keys must be pressed/released manually for now (no OS window integration yet). Planned for a future renderer pass.
-
 ## Roadmap
 
-- [ ] SDL2 or SFML window + real input events
-- [ ] Sprite renderer
+- [x] SDL2 window + real input events
+- [x] Tilemap component + renderer
+- [ ] Sprite / texture renderer
 - [ ] Audio system
 - [ ] Scene manager
-- [ ] Collision detection
+- [ ] AABB collision system
