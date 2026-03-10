@@ -50,7 +50,7 @@ Requires `g++` with C++17 support and SDL2. Output binary is `./game_engine`.
 
 ### Engine loop
 
-`Engine` owns the SDL2 window and renderer. Override virtual hooks in your game subclass:
+`Engine` owns the SDL2 window and renderer. Override virtual hooks in game subclass:
 
 ```cpp
 class MyGame : public Engine {
@@ -89,7 +89,7 @@ if (map.isSolid(playerPos)) { /* blocked */ }
 ```
 
 **TileTypes:** `Empty`, `Ground`, `Wall`, `Water`  
-Add your own by extending the `TileType` enum and the `tileColor()` table in `TileMap.h`.
+Add by extending the `TileType` enum and the `tileColor()` table in `TileMap.h`.
 
 ### Input
 
