@@ -112,7 +112,7 @@ Vec2 c = Vec2::up() + Vec2::right();
 
 - [x] SDL2 window + real input events
 - [x] Tilemap component + renderer
-- [ ] Sprite / texture renderer
+- [x] Sprite / texture renderer
 - [ ] Audio system
 - [ ] Scene manager
 - [ ] AABB collision system
