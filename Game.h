@@ -3,10 +3,9 @@
 #include "ECS.h"
 #include "Vec2.h"
 #include "TileMap.h"
+#include "Sprite.h"
+#include "Enemy.h"
 
-// ---------------------------------------------------------------------------
-// Components
-// ---------------------------------------------------------------------------
 struct Transform : Component
 {
     Vec2  position;
@@ -26,9 +25,6 @@ struct Tag : Component
     Tag(const std::string& n) : name(n) {}
 };
 
-// ---------------------------------------------------------------------------
-// Game
-// ---------------------------------------------------------------------------
 class Game : public Engine
 {
 public:
@@ -42,8 +38,11 @@ protected:
     void onShutdown()                  override;
 
 private:
-    EntityID m_player  = 0;
+    void spawnEnemy(Vec2 waypointA, Vec2 waypointB,
+                    float speed = 70.f, float detect = 180.f);
+
+    EntityID m_player    = 0;
     EntityID m_mapEntity = 0;
 
-    float m_playerSpeed = 180.f;  // pixels per second
+    float m_playerSpeed  = 180.f;
 };
