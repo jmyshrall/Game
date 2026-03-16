@@ -7,22 +7,29 @@ CXX=${CXX:-g++}
 FLAGS="-std=c++17 -O2 -Wall"
 OUT="game_engine"
 
-# detect SDL2 flags via pkg-config, fall back to sensible defaults
-if command -v pkg-config &>/dev/null && pkg-config --exists sdl2; then
-    SDL_FLAGS=$(pkg-config --cflags --libs sdl2)
+if command -v pkg-config &>/dev/null && pkg-config --exists sdl2 SDL2_image 2>/dev/null; then
+    SDL_CFLAGS=$(pkg-config --cflags sdl2 SDL2_image)
+    SDL_LIBS=$(pkg-config --libs sdl2 SDL2_image)
+elif command -v pkg-config &>/dev/null && pkg-config --exists sdl2 2>/dev/null; then
+    SDL_CFLAGS=$(pkg-config --cflags sdl2)
+    SDL_LIBS="$(pkg-config --libs sdl2) -lSDL2_image"
 else
-    SDL_FLAGS="-I/usr/include/SDL2 -lSDL2"
+    SDL_CFLAGS="-I/usr/include/SDL2"
+    SDL_LIBS="-lSDL2 -lSDL2_image"
 fi
 
-echo "Building with SDL2..."
+echo "Building with SDL2 + SDL2_image..."
 
-$CXX $FLAGS \
-    main.cpp   \
-    Engine.cpp \
-    Input.cpp  \
-    ECS.cpp    \
-    Game.cpp   \
-    $SDL_FLAGS \
+$CXX $FLAGS $SDL_CFLAGS \
+    main.cpp            \
+    Engine.cpp          \
+    Input.cpp           \
+    ECS.cpp             \
+    Game.cpp            \
+    Enemy.cpp           \
+    Sprite.cpp          \
+    TextureManager.cpp  \
+    $SDL_LIBS           \
     -o $OUT
 
-echo "done run with: ./$OUT"
+echo "Done — run with: ./$OUT"
